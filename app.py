@@ -1,3 +1,27 @@
+# Theme & CSS
+import streamlit as st
+st.markdown(open(".streamlit/config.toml").read(), unsafe_allow_html=True)
+st.markdown("""
+<style>
+.stApp { background: linear-gradient(135deg, #E8EAF6, #FFF); }
+[data-testid="stSidebar"] { background-color: #F0F2F6; }
+h2 { color: #1E1E2F !important; }
+.stButton>button { background-color: #1E1E2F; color: #FFF; border-radius:8px; }
+</style>
+""", unsafe_allow_html=True)
+
+# Stylable Card
+from streamlit_extras.stylable_container import stylable_container
+with stylable_container(key="card1", css_styles="""
+    {border-radius:15px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:20px;background:#fff;}
+"""):
+    st.metric("🏆 Total Revenue", "$500K", delta="+15%")
+
+# Lottie Animation
+import requests
+from streamlit_lottie import st_lottie
+lottie = requests.get("https://assets5.lottiefiles.com/packages/lf20_V9t630.json").json()
+st_lottie(lottie, height=150)
 st.markdown("""
 <style>
 .stApp { background: linear-gradient(135deg, #E8EAF6, #FFF); }

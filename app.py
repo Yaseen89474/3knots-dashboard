@@ -1,3 +1,11 @@
+st.markdown("""
+<style>
+.stApp { background: linear-gradient(135deg, #E8EAF6, #FFF); }
+[data-testid="stSidebar"] { background-color: #F0F2F6; }
+h2 { color: #1E1E2F !important; }
+.stButton>button { background-color: #1E1E2F; color: #FFF; border-radius:8px; }
+</style>
+""", unsafe_allow_html=True)
 import streamlit as st
 import yaml
 import streamlit_authenticator as stauth

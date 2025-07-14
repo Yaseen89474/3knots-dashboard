@@ -1,40 +1,40 @@
 import streamlit as st
-import pandas as pd
+import yaml
+import streamlit_authenticator as stauth
 
-st.set_page_config(page_title="3Knots Digital CEO Dashboard", layout="wide")
+# Load config
+with open('config.yaml') as f:
+    config = yaml.safe_load(f)
 
-# Branding Header
-st.markdown("""
-    <div style='background-color:#1E1E2F;padding:20px;border-radius:10px'>
-        <h1 style='color:#ffffff;text-align:center;'>3Knots Digital - CEO Dashboard</h1>
-        <p style='color:#bbbbbb;text-align:center;'>https://3knotshost.com/</p>
-    </div>
-""", unsafe_allow_html=True)
+# Hash plain-text passwords once
+hashed = stauth.Hasher(
+    [u["password"] for u in config["credentials"]["usernames"].values()]
+).generate()
+for i, u in enumerate(config["credentials"]["usernames"]):
+    config["credentials"]["usernames"][u]["password"] = hashed[i]
 
-role = st.sidebar.selectbox("Select your role", ["CEO", "Marketing", "Sales", "Projects"])
-st.sidebar.markdown("---")
-st.sidebar.info("Welcome to your role-based view")
+auth = stauth.Authenticate(
+    config['credentials'], config['cookie']['name'],
+    config['cookie']['key'], config['cookie']['expiry_days'],
+    config.get('preauthorized')
+)
 
-# Google Sheet links
-marketing_sheet = "https://docs.google.com/spreadsheets/d/1Q-BZaKmka9-Y8RkUXduT7v9qwA6TF8rAaoyDWAZumY8/edit?usp=sharing"
-sales_sheet = "https://docs.google.com/spreadsheets/d/1ZV8xgRVXR1PZTI7n9_KvSclv8MQEd4zAAGCUuW1L1f4/edit?usp=sharing"
-projects_sheet = "https://docs.google.com/spreadsheets/d/1GiE4AUs3Qxyk6XQ1Tj6Pa1q44MzOizxfRBLs90CptXw/edit?usp=sharing"
-
-if role == "CEO":
-    st.subheader("Full Dashboard Overview")
-    st.markdown("📈 Sales Overview [Live Google Sheet]({})".format(sales_sheet))
-    st.markdown("📊 Marketing Overview [Live Google Sheet]({})".format(marketing_sheet))
-    st.markdown("✅ Project Tasks [Live Google Sheet]({})".format(projects_sheet))
-elif role == "Marketing":
-    st.subheader("Marketing Dashboard")
-    st.markdown("📊 [Open Marketing Sheet]({})".format(marketing_sheet))
-elif role == "Sales":
-    st.subheader("Sales Dashboard")
-    st.markdown("📈 [Open Sales Sheet]({})".format(sales_sheet))
-elif role == "Projects":
-    st.subheader("Project Dashboard")
-    st.markdown("✅ [Open Project Tasks Sheet]({})".format(projects_sheet))
-
-# Footer branding
-st.markdown("<hr>", unsafe_allow_html=True)
-st.markdown("<center style='color:gray;'>© 2025 3Knots Digital — All Rights Reserved</center>", unsafe_allow_html=True)
+name, status, username = auth.login('Login', 'sidebar')
+if status:
+    auth.logout('Logout', 'sidebar')
+    role = config['credentials']['usernames'][username]['roles'][0]
+    st.markdown(
+        "<div style='background:#1E1E2F;padding:15px;border-radius:8px'>"
+        "<h2 style='color:#fff;text-align:center;'>3Knots Digital CEO Dashboard</h2></div>",
+        unsafe_allow_html=True
+    )
+    st.write(f"**User:** {name} — Role: {role}")
+    if role == 'admin':
+        st.subheader("🔐 Admin Panel")
+        st.write("Here you can manage user access etc.")
+    st.subheader("📊 Dashboard Overview")
+    st.write("Sales, Marketing, Projects placeholders...")
+elif status is False:
+    st.error("Username/password incorrect")
+else:
+    st.warning("Please enter credentials")

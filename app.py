@@ -1,16 +1,13 @@
 import streamlit as st
 import yaml
-from streamlit_authenticator.utilities.hasher import Hasher
 import streamlit_authenticator as stauth
+from streamlit_authenticator.utilities.hasher import Hasher
 
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
 
-# Fix hashing
-passwords = [u["password"] for u in config["credentials"]["usernames"].values()]
-hashed = Hasher(passwords).generate()
-for i, user in enumerate(config["credentials"]["usernames"]):
-    config["credentials"]["usernames"][user]["password"] = hashed[i]
+# Hash all plain-text passwords (new method)
+config['credentials'] = Hasher.hash_passwords(config['credentials'])
 
 auth = stauth.Authenticate(
     config['credentials'],
@@ -19,3 +16,11 @@ auth = stauth.Authenticate(
     config['cookie']['expiry_days'],
     config.get('preauthorized')
 )
+
+name, status, username = auth.login('Login', 'sidebar')
+if status:
+    auth.logout('Logout', 'sidebar')
+    role = config['credentials']['usernames'][username]['roles'][0]
+
+    st.markdown(… # your styling here
+    )

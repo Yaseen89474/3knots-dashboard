@@ -16,6 +16,3 @@ cookie:
   name: 3knotsCEO
   key: some_random_signature_key
   expiry_days: 30
-preauthorized:
-  emails:
-    - team@3knots.com
